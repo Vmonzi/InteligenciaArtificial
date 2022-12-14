@@ -26,15 +26,12 @@ public class Enemys : MonoBehaviour
     public float viewAngle;
     void Update()
     {
-
         if (InFOV(target))
         {
             Debug.DrawLine(transform.position, target.transform.position, Color.red);
             Vector3 dir = target.transform.position - transform.position;
-            dir.y = 0;
             transform.position += (transform.forward * speed) * Time.deltaTime;
             transform.forward = dir;
-            GameManager.instance.ChangeObjectColor(this.gameObject, Color.yellow);
         }
         else if (GameManager.instance.alert)
         {
@@ -47,20 +44,16 @@ public class Enemys : MonoBehaviour
             if (pathToFollow.Count > 0)
             {
                 FollowPath();
-                GameManager.instance.ChangeObjectColor(this.gameObject, Color.red);
             }
         }
         else
         {
-            pathToFollow.Clear();
             GameManager.instance.alert = false;
             if (InLineOfSight(allWaypoints[_currentWP].transform.position, transform.position))
             {
                 Debug.DrawLine(allWaypoints[_currentWP].transform.position, transform.position, Color.blue);
                 Node waypoint = allWaypoints[_currentWP];
                 Vector3 dir = waypoint.transform.position - transform.position;
-                GameManager.instance.ChangeObjectColor(this.gameObject, Color.white);
-                dir.y = 0;
                 transform.position += (transform.forward * speed) * Time.deltaTime;
                 if (dir.magnitude <= 10f)
                 {
@@ -69,24 +62,23 @@ public class Enemys : MonoBehaviour
                 }
                 transform.forward = dir;
             }
+
             else
             {
-
-                GameManager.instance.ChangeObjectColor(this.gameObject, Color.blue);
-                startingNode = NearNode(this.transform);
-                goalNode = allWaypoints[0];
-                SetPath(_pf.AStar(startingNode, goalNode));
+                if (pathToFollow.Count == 0)
+                {
+                    startingNode = NearNode(this.transform);
+                    goalNode = allWaypoints[0];
+                    SetPath(_pf.AStar(startingNode, goalNode));
+                }
+                if (pathToFollow.Count > 0)
+                {
+                    FollowPath();
+                }
+                //startingNode = allWaypoints[0];
+                //goalNode = NearNode(allWaypoints[1].transform);
+                //SetPath(_pf.AStar(startingNode, goalNode));
             }
-
-            //else
-            //{
-            //    GameManager.instance.alert = false;
-            //    startingNode = NearNode(goalNode.gameObject.transform);
-            //    goalNode = NearNode(allWaypoints[1].transform);
-            //    SetPath(_pf.AStar(startingNode, goalNode));
-            //}
-
-
         }
     }
 
